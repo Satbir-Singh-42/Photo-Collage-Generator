@@ -111,3 +111,6 @@ Options:
 - Batch collage generation with progress tracking
 - Save dialog for custom file naming
 - Thread-safe UI updates
+- **NEW: Custom Shape Feature** - Upload any PNG mask to create custom shaped collages
+- **NEW: Prominent Upload Buttons** - Large "Upload Images" and "Upload Folder" buttons
+- **NEW: Responsive Design** - GUI adapts to window resizing with debounced preview updates
