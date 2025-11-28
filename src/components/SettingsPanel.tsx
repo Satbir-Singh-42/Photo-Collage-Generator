@@ -99,32 +99,28 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
 
       <div className="setting-group">
         <label htmlFor="outerFrameThickness">Frame Thickness</label>
-        <div className="setting-row">
-          <input
-            type="range"
-            id="outerFrameThickness"
-            min="0"
-            max="100"
-            value={settings.outerFrameThickness}
-            onChange={(e) => updateSetting('outerFrameThickness', parseInt(e.target.value))}
-          />
-          <span className="range-value">{settings.outerFrameThickness}px</span>
-        </div>
+        <select
+          id="outerFrameThickness"
+          value={settings.outerFrameThickness}
+          onChange={(e) => updateSetting('outerFrameThickness', parseInt(e.target.value))}
+        >
+          {[0, 5, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100].map((val) => (
+            <option key={val} value={val}>{val}px</option>
+          ))}
+        </select>
       </div>
 
       <div className="setting-group">
         <label htmlFor="innerSpacing">Inner Spacing</label>
-        <div className="setting-row">
-          <input
-            type="range"
-            id="innerSpacing"
-            min="0"
-            max="50"
-            value={settings.innerSpacing}
-            onChange={(e) => updateSetting('innerSpacing', parseInt(e.target.value))}
-          />
-          <span className="range-value">{settings.innerSpacing}px</span>
-        </div>
+        <select
+          id="innerSpacing"
+          value={settings.innerSpacing}
+          onChange={(e) => updateSetting('innerSpacing', parseInt(e.target.value))}
+        >
+          {[0, 2, 5, 8, 10, 15, 20, 25, 30, 40, 50].map((val) => (
+            <option key={val} value={val}>{val}px</option>
+          ))}
+        </select>
       </div>
 
       <div className="setting-group checkbox">
@@ -141,17 +137,15 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
       {settings.enableRoundedCorners && (
         <div className="setting-group">
           <label htmlFor="roundedCornersRadius">Corner Radius</label>
-          <div className="setting-row">
-            <input
-              type="range"
-              id="roundedCornersRadius"
-              min="0"
-              max="50"
-              value={settings.roundedCornersRadius}
-              onChange={(e) => updateSetting('roundedCornersRadius', parseInt(e.target.value))}
-            />
-            <span className="range-value">{settings.roundedCornersRadius}px</span>
-          </div>
+          <select
+            id="roundedCornersRadius"
+            value={settings.roundedCornersRadius}
+            onChange={(e) => updateSetting('roundedCornersRadius', parseInt(e.target.value))}
+          >
+            {[0, 5, 10, 15, 20, 25, 30, 40, 50].map((val) => (
+              <option key={val} value={val}>{val}px</option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -169,17 +163,15 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
       {settings.enableDropShadow && (
         <div className="setting-group">
           <label htmlFor="shadowBlur">Shadow Blur</label>
-          <div className="setting-row">
-            <input
-              type="range"
-              id="shadowBlur"
-              min="0"
-              max="30"
-              value={settings.shadowBlur}
-              onChange={(e) => updateSetting('shadowBlur', parseInt(e.target.value))}
-            />
-            <span className="range-value">{settings.shadowBlur}px</span>
-          </div>
+          <select
+            id="shadowBlur"
+            value={settings.shadowBlur}
+            onChange={(e) => updateSetting('shadowBlur', parseInt(e.target.value))}
+          >
+            {[0, 2, 5, 8, 10, 15, 20, 25, 30].map((val) => (
+              <option key={val} value={val}>{val}px</option>
+            ))}
+          </select>
         </div>
       )}
     </div>
