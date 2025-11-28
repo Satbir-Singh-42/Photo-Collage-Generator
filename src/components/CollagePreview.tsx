@@ -29,7 +29,7 @@ export default function CollagePreview({ images, settings, collageIndex }: Colla
       settings.enableRoundedCorners, settings.enableDropShadow, settings.shadowBlur, settings.shape]);
 
   const imageIds = useMemo(() => 
-    images.map(img => img.file.name + img.file.size).join(','),
+    images.map(img => img.file.name + img.file.size + (img.rotation || 0)).join(','),
     [images]
   );
 

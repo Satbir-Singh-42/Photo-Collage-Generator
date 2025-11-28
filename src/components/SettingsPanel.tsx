@@ -21,17 +21,23 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
         <div className="setting-value">{imageCount} images</div>
       </div>
 
-      <div className="setting-group">
-        <label htmlFor="imagesPerCollage">Images per Collage</label>
-        <input
-          type="number"
-          id="imagesPerCollage"
-          min="1"
-          max="200"
-          value={settings.imagesPerCollage}
-          onChange={(e) => updateSetting('imagesPerCollage', parseInt(e.target.value) || 1)}
-        />
-      </div>
+      {imageCount > 0 && (
+        <div className="setting-group">
+          <label htmlFor="imagesPerCollage">Images per Collage</label>
+          <input
+            type="number"
+            id="imagesPerCollage"
+            min="1"
+            max={imageCount}
+            value={Math.min(settings.imagesPerCollage, imageCount)}
+            onChange={(e) => {
+              const value = parseInt(e.target.value) || 1;
+              updateSetting('imagesPerCollage', Math.min(value, imageCount));
+            }}
+          />
+          <span className="setting-hint">Max: {imageCount}</span>
+        </div>
+      )}
 
       <div className="setting-group">
         <label htmlFor="canvasWidth">Canvas Width (px)</label>

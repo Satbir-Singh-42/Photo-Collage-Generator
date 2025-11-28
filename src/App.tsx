@@ -35,6 +35,10 @@ function App() {
       });
       setLoadedImages(images);
       setActiveCollageIndex(0);
+      setSettings(prev => ({
+        ...prev,
+        imagesPerCollage: Math.min(prev.imagesPerCollage, images.length) || images.length
+      }));
     } catch (error) {
       console.error('Failed to load images:', error);
     } finally {
