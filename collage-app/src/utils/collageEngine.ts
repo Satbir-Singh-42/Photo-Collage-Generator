@@ -1,0 +1,362 @@
+export type CollageShape = 'square' | 'rectangle' | 'circle' | 'heart';
+
+export interface CollageSettings {
+  canvasWidth: number;
+  canvasHeight: number;
+  backgroundColor: string;
+  outerFrameThickness: number;
+  innerSpacing: number;
+  roundedCornersRadius: number;
+  enableRoundedCorners: boolean;
+  enableDropShadow: boolean;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
+  shadowBlur: number;
+  shadowColor: string;
+  imagesPerCollage: number;
+  shape: CollageShape;
+}
+
+export const defaultSettings: CollageSettings = {
+  canvasWidth: 3000,
+  canvasHeight: 3000,
+  backgroundColor: '#ffffff',
+  outerFrameThickness: 20,
+  innerSpacing: 10,
+  roundedCornersRadius: 10,
+  enableRoundedCorners: true,
+  enableDropShadow: true,
+  shadowOffsetX: 5,
+  shadowOffsetY: 5,
+  shadowBlur: 10,
+  shadowColor: 'rgba(0, 0, 0, 0.3)',
+  imagesPerCollage: 50,
+  shape: 'square',
+};
+
+export interface LoadedImage {
+  file: File;
+  element: HTMLImageElement;
+  width: number;
+  height: number;
+}
+
+export function calculateGrid(numImages: number): { rows: number; cols: number } {
+  if (numImages <= 0) return { rows: 0, cols: 0 };
+  
+  const cols = Math.ceil(Math.sqrt(numImages));
+  let rows = Math.ceil(numImages / cols);
+  
+  while (rows * cols < numImages) {
+    rows++;
+  }
+  
+  return { rows, cols };
+}
+
+export function splitIntoGroups<T>(items: T[], groupSize: number): T[][] {
+  const groups: T[][] = [];
+  for (let i = 0; i < items.length; i += groupSize) {
+    groups.push(items.slice(i, i + groupSize));
+  }
+  return groups;
+}
+
+export async function loadImage(file: File): Promise<LoadedImage> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        resolve({
+          file,
+          element: img,
+          width: img.width,
+          height: img.height,
+        });
+      };
+      img.onerror = () => reject(new Error(`Failed to load image: ${file.name}`));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function loadImages(
+  files: File[],
+  onProgress?: (loaded: number, total: number) => void
+): Promise<LoadedImage[]> {
+  const images: LoadedImage[] = [];
+  let loaded = 0;
+  
+  for (const file of files) {
+    try {
+      const img = await loadImage(file);
+      images.push(img);
+    } catch (error) {
+      console.warn(`Skipping corrupted/unreadable image: ${file.name}`, error);
+    }
+    loaded++;
+    onProgress?.(loaded, files.length);
+  }
+  
+  return images;
+}
+
+function smartCrop(
+  img: HTMLImageElement,
+  targetWidth: number,
+  targetHeight: number
+): ImageData {
+  const imgRatio = img.width / img.height;
+  const targetRatio = targetWidth / targetHeight;
+  
+  let sourceX = 0;
+  let sourceY = 0;
+  let sourceWidth = img.width;
+  let sourceHeight = img.height;
+  
+  if (imgRatio > targetRatio) {
+    sourceWidth = img.height * targetRatio;
+    sourceX = (img.width - sourceWidth) / 2;
+  } else {
+    sourceHeight = img.width / targetRatio;
+    sourceY = (img.height - sourceHeight) / 2;
+  }
+  
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = targetWidth;
+  tempCanvas.height = targetHeight;
+  const tempCtx = tempCanvas.getContext('2d')!;
+  
+  tempCtx.drawImage(
+    img,
+    sourceX, sourceY, sourceWidth, sourceHeight,
+    0, 0, targetWidth, targetHeight
+  );
+  
+  return tempCtx.getImageData(0, 0, targetWidth, targetHeight);
+}
+
+function drawRoundedRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+): void {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function drawHeartPath(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, size: number): void {
+  ctx.beginPath();
+  const scale = size / 32;
+  
+  for (let i = 0; i <= 360; i++) {
+    const t = (i * Math.PI) / 180;
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    
+    const px = centerX + x * scale;
+    const py = centerY + y * scale;
+    
+    if (i === 0) {
+      ctx.moveTo(px, py);
+    } else {
+      ctx.lineTo(px, py);
+    }
+  }
+  ctx.closePath();
+}
+
+function applyShapeMask(
+  canvas: HTMLCanvasElement,
+  shape: CollageShape
+): HTMLCanvasElement {
+  if (shape === 'square' || shape === 'rectangle') {
+    return canvas;
+  }
+  
+  const maskedCanvas = document.createElement('canvas');
+  maskedCanvas.width = canvas.width;
+  maskedCanvas.height = canvas.height;
+  const ctx = maskedCanvas.getContext('2d')!;
+  
+  ctx.save();
+  
+  if (shape === 'circle') {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(canvas.width, canvas.height) / 2;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.closePath();
+  } else if (shape === 'heart') {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height * 0.45;
+    const size = Math.min(canvas.width, canvas.height) * 0.9;
+    drawHeartPath(ctx, centerX, centerY, size);
+  }
+  
+  ctx.clip();
+  ctx.drawImage(canvas, 0, 0);
+  ctx.restore();
+  
+  return maskedCanvas;
+}
+
+export function generateCollage(
+  images: LoadedImage[],
+  settings: CollageSettings
+): HTMLCanvasElement {
+  const { rows, cols } = calculateGrid(images.length);
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = settings.canvasWidth;
+  canvas.height = settings.canvasHeight;
+  const ctx = canvas.getContext('2d')!;
+  
+  ctx.fillStyle = settings.backgroundColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  const frame = settings.outerFrameThickness;
+  const spacing = settings.innerSpacing;
+  
+  const totalHSpacing = (cols - 1) * spacing;
+  const totalVSpacing = (rows - 1) * spacing;
+  const usableW = settings.canvasWidth - 2 * frame - totalHSpacing;
+  const usableH = settings.canvasHeight - 2 * frame - totalVSpacing;
+  
+  const cellW = Math.floor(usableW / cols);
+  const cellH = Math.floor(usableH / rows);
+  
+  let shadowPadding = 0;
+  if (settings.enableDropShadow) {
+    shadowPadding = settings.shadowBlur + Math.max(
+      Math.abs(settings.shadowOffsetX),
+      Math.abs(settings.shadowOffsetY)
+    );
+  }
+  
+  const extraMargin = 4;
+  let imgW = cellW - 2 * shadowPadding - extraMargin;
+  let imgH = cellH - 2 * shadowPadding - extraMargin;
+  
+  const minSize = 20;
+  if (imgW < minSize || imgH < minSize) {
+    imgW = Math.max(minSize, cellW - 10);
+    imgH = Math.max(minSize, cellH - 10);
+    shadowPadding = 2;
+  }
+  
+  for (let idx = 0; idx < images.length; idx++) {
+    const row = Math.floor(idx / cols);
+    const col = idx % cols;
+    
+    const cellX = frame + col * (cellW + spacing);
+    const cellY = frame + row * (cellH + spacing);
+    
+    const img = images[idx].element;
+    
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = imgW;
+    tempCanvas.height = imgH;
+    const tempCtx = tempCanvas.getContext('2d')!;
+    
+    const imgData = smartCrop(img, imgW, imgH);
+    tempCtx.putImageData(imgData, 0, 0);
+    
+    let processedCanvas = tempCanvas;
+    
+    if (settings.enableRoundedCorners && settings.roundedCornersRadius > 0) {
+      const roundedCanvas = document.createElement('canvas');
+      roundedCanvas.width = imgW;
+      roundedCanvas.height = imgH;
+      const roundedCtx = roundedCanvas.getContext('2d')!;
+      
+      roundedCtx.save();
+      drawRoundedRect(roundedCtx, 0, 0, imgW, imgH, settings.roundedCornersRadius);
+      roundedCtx.clip();
+      roundedCtx.drawImage(processedCanvas, 0, 0);
+      roundedCtx.restore();
+      
+      processedCanvas = roundedCanvas;
+    }
+    
+    let finalW = imgW;
+    let finalH = imgH;
+    
+    if (settings.enableDropShadow) {
+      ctx.save();
+      ctx.shadowColor = settings.shadowColor;
+      ctx.shadowBlur = settings.shadowBlur;
+      ctx.shadowOffsetX = settings.shadowOffsetX;
+      ctx.shadowOffsetY = settings.shadowOffsetY;
+    }
+    
+    const x = cellX + Math.floor((cellW - finalW) / 2);
+    const y = cellY + Math.floor((cellH - finalH) / 2);
+    
+    if (settings.enableDropShadow && settings.enableRoundedCorners) {
+      ctx.fillStyle = '#ffffff';
+      drawRoundedRect(ctx, x, y, finalW, finalH, settings.roundedCornersRadius);
+      ctx.fill();
+    }
+    
+    ctx.drawImage(processedCanvas, x, y);
+    
+    if (settings.enableDropShadow) {
+      ctx.restore();
+    }
+  }
+  
+  if (settings.shape !== 'square' && settings.shape !== 'rectangle') {
+    return applyShapeMask(canvas, settings.shape);
+  }
+  
+  return canvas;
+}
+
+export function canvasToBlob(canvas: HTMLCanvasElement, type: 'png' | 'jpeg', quality = 0.95): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to convert canvas to blob'));
+        }
+      },
+      `image/${type}`,
+      quality
+    );
+  });
+}
+
+export async function downloadCollage(
+  canvas: HTMLCanvasElement,
+  filename: string,
+  format: 'png' | 'jpeg'
+): Promise<void> {
+  const blob = await canvasToBlob(canvas, format);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
