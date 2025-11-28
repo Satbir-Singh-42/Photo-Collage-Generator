@@ -46,6 +46,30 @@ export interface LoadedImage {
 export function calculateGrid(numImages: number): { rows: number; cols: number } {
   if (numImages <= 0) return { rows: 0, cols: 0 };
   
+  if (numImages === 1) return { rows: 1, cols: 1 };
+  if (numImages === 2) return { rows: 1, cols: 2 };
+  if (numImages === 3) return { rows: 1, cols: 3 };
+  if (numImages === 4) return { rows: 1, cols: 4 };
+  if (numImages === 5) return { rows: 1, cols: 5 };
+  if (numImages === 6) return { rows: 2, cols: 3 };
+  if (numImages === 7) return { rows: 2, cols: 4 };
+  if (numImages === 8) return { rows: 2, cols: 4 };
+  if (numImages === 9) return { rows: 3, cols: 3 };
+  if (numImages === 10) return { rows: 2, cols: 5 };
+  if (numImages <= 12) return { rows: 3, cols: 4 };
+  if (numImages <= 15) return { rows: 3, cols: 5 };
+  if (numImages <= 20) return { rows: 4, cols: 5 };
+  if (numImages <= 25) return { rows: 5, cols: 5 };
+  if (numImages <= 30) return { rows: 5, cols: 6 };
+  if (numImages <= 36) return { rows: 6, cols: 6 };
+  if (numImages <= 42) return { rows: 6, cols: 7 };
+  if (numImages <= 49) return { rows: 7, cols: 7 };
+  if (numImages <= 56) return { rows: 7, cols: 8 };
+  if (numImages <= 64) return { rows: 8, cols: 8 };
+  if (numImages <= 72) return { rows: 8, cols: 9 };
+  if (numImages <= 81) return { rows: 9, cols: 9 };
+  if (numImages <= 100) return { rows: 10, cols: 10 };
+  
   const cols = Math.ceil(Math.sqrt(numImages));
   let rows = Math.ceil(numImages / cols);
   
