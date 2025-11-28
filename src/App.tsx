@@ -3,6 +3,7 @@ import ImageUploader from './components/ImageUploader';
 import SettingsPanel from './components/SettingsPanel';
 import CollagePreview from './components/CollagePreview';
 import ExportPanel from './components/ExportPanel';
+import ImageGrid from './components/ImageGrid';
 import type { CollageSettings, LoadedImage } from './utils/collageEngine';
 import { defaultSettings, loadImages, splitIntoGroups } from './utils/collageEngine';
 import './App.css';
@@ -62,6 +63,16 @@ function App() {
     setActiveCollageIndex(0);
   }, []);
 
+  const handleReorderImages = useCallback((reorderedImages: LoadedImage[]) => {
+    setLoadedImages(reorderedImages);
+  }, []);
+
+  const handleRotateImage = useCallback((index: number, rotation: number) => {
+    setLoadedImages(prev => prev.map((img, i) => 
+      i === index ? { ...img, rotation } : img
+    ));
+  }, []);
+
   return (
     <div className="app">
       <header className="app-header">
@@ -109,6 +120,21 @@ function App() {
               )}
             </div>
           </div>
+
+          {loadedImages.length > 0 && (
+            <div className="card">
+              <div className="card-header">
+                <h3>Arrange Images</h3>
+              </div>
+              <div className="card-body">
+                <ImageGrid
+                  images={loadedImages}
+                  onReorder={handleReorderImages}
+                  onRotate={handleRotateImage}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="card">
             <div className="card-header">
