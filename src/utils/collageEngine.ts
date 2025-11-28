@@ -1,9 +1,10 @@
-export type CollageShape = 'square' | 'rectangle' | 'circle' | 'heart';
+export type CollageShape = 'square' | 'rectangle' | 'circle' | 'heart' | 'star' | 'diamond' | 'hexagon' | 'triangle';
 
 export interface CollageSettings {
   canvasWidth: number;
   canvasHeight: number;
   backgroundColor: string;
+  transparentBackground: boolean;
   outerFrameThickness: number;
   innerSpacing: number;
   roundedCornersRadius: number;
@@ -21,6 +22,7 @@ export const defaultSettings: CollageSettings = {
   canvasWidth: 3000,
   canvasHeight: 3000,
   backgroundColor: '#ffffff',
+  transparentBackground: false,
   outerFrameThickness: 20,
   innerSpacing: 10,
   roundedCornersRadius: 10,
@@ -135,8 +137,10 @@ function fitImage(
   tempCanvas.height = targetHeight;
   const tempCtx = tempCanvas.getContext('2d')!;
   
-  tempCtx.fillStyle = backgroundColor;
-  tempCtx.fillRect(0, 0, targetWidth, targetHeight);
+  if (backgroundColor !== 'transparent') {
+    tempCtx.fillStyle = backgroundColor;
+    tempCtx.fillRect(0, 0, targetWidth, targetHeight);
+  }
   
   tempCtx.drawImage(
     img,
@@ -189,6 +193,66 @@ function drawHeartPath(ctx: CanvasRenderingContext2D, centerX: number, centerY: 
   ctx.closePath();
 }
 
+function drawStarPath(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, size: number): void {
+  ctx.beginPath();
+  const outerRadius = size / 2;
+  const innerRadius = outerRadius * 0.4;
+  const points = 5;
+  
+  for (let i = 0; i < points * 2; i++) {
+    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+    const angle = (i * Math.PI) / points - Math.PI / 2;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.closePath();
+}
+
+function drawDiamondPath(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, size: number): void {
+  ctx.beginPath();
+  const halfSize = size / 2;
+  ctx.moveTo(centerX, centerY - halfSize);
+  ctx.lineTo(centerX + halfSize, centerY);
+  ctx.lineTo(centerX, centerY + halfSize);
+  ctx.lineTo(centerX - halfSize, centerY);
+  ctx.closePath();
+}
+
+function drawHexagonPath(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, size: number): void {
+  ctx.beginPath();
+  const radius = size / 2;
+  
+  for (let i = 0; i < 6; i++) {
+    const angle = (i * Math.PI) / 3 - Math.PI / 2;
+    const x = centerX + Math.cos(angle) * radius;
+    const y = centerY + Math.sin(angle) * radius;
+    
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.closePath();
+}
+
+function drawTrianglePath(ctx: CanvasRenderingContext2D, centerX: number, centerY: number, size: number): void {
+  ctx.beginPath();
+  const height = size * 0.866;
+  const halfWidth = size / 2;
+  
+  ctx.moveTo(centerX, centerY - height / 2);
+  ctx.lineTo(centerX + halfWidth, centerY + height / 2);
+  ctx.lineTo(centerX - halfWidth, centerY + height / 2);
+  ctx.closePath();
+}
+
 function applyShapeMask(
   canvas: HTMLCanvasElement,
   shape: CollageShape
@@ -204,18 +268,27 @@ function applyShapeMask(
   
   ctx.save();
   
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const size = Math.min(canvas.width, canvas.height) * 0.95;
+  
   if (shape === 'circle') {
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
     const radius = Math.min(canvas.width, canvas.height) / 2;
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
     ctx.closePath();
   } else if (shape === 'heart') {
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height * 0.45;
-    const size = Math.min(canvas.width, canvas.height) * 0.9;
-    drawHeartPath(ctx, centerX, centerY, size);
+    const heartCenterY = canvas.height * 0.45;
+    const heartSize = Math.min(canvas.width, canvas.height) * 0.9;
+    drawHeartPath(ctx, centerX, heartCenterY, heartSize);
+  } else if (shape === 'star') {
+    drawStarPath(ctx, centerX, centerY, size);
+  } else if (shape === 'diamond') {
+    drawDiamondPath(ctx, centerX, centerY, size);
+  } else if (shape === 'hexagon') {
+    drawHexagonPath(ctx, centerX, centerY, size);
+  } else if (shape === 'triangle') {
+    drawTrianglePath(ctx, centerX, centerY, size);
   }
   
   ctx.clip();
@@ -236,8 +309,10 @@ export function generateCollage(
   canvas.height = settings.canvasHeight;
   const ctx = canvas.getContext('2d')!;
   
-  ctx.fillStyle = settings.backgroundColor;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (!settings.transparentBackground) {
+    ctx.fillStyle = settings.backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
   
   const frame = settings.outerFrameThickness;
   const spacing = settings.innerSpacing;
@@ -278,7 +353,8 @@ export function generateCollage(
     
     const img = images[idx].element;
     
-    let processedCanvas = fitImage(img, imgW, imgH, settings.backgroundColor);
+    const bgColor = settings.transparentBackground ? 'transparent' : settings.backgroundColor;
+    let processedCanvas = fitImage(img, imgW, imgH, bgColor);
     
     if (settings.enableRoundedCorners && settings.roundedCornersRadius > 0) {
       const roundedCanvas = document.createElement('canvas');

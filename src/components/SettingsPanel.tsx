@@ -67,18 +67,35 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
           <option value="rectangle">Rectangle</option>
           <option value="circle">Circle</option>
           <option value="heart">Heart</option>
+          <option value="star">Star</option>
+          <option value="diamond">Diamond</option>
+          <option value="hexagon">Hexagon</option>
+          <option value="triangle">Triangle</option>
         </select>
       </div>
 
-      <div className="setting-group">
-        <label htmlFor="backgroundColor">Background Color</label>
-        <input
-          type="color"
-          id="backgroundColor"
-          value={settings.backgroundColor}
-          onChange={(e) => updateSetting('backgroundColor', e.target.value)}
-        />
+      <div className="setting-group checkbox">
+        <label>
+          <input
+            type="checkbox"
+            checked={settings.transparentBackground}
+            onChange={(e) => updateSetting('transparentBackground', e.target.checked)}
+          />
+          Transparent Background
+        </label>
       </div>
+
+      {!settings.transparentBackground && (
+        <div className="setting-group">
+          <label htmlFor="backgroundColor">Background Color</label>
+          <input
+            type="color"
+            id="backgroundColor"
+            value={settings.backgroundColor}
+            onChange={(e) => updateSetting('backgroundColor', e.target.value)}
+          />
+        </div>
+      )}
 
       <div className="setting-group">
         <label htmlFor="outerFrameThickness">Frame Thickness</label>
