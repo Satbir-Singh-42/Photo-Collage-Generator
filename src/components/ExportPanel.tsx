@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import type { CollageSettings, LoadedImage } from '../utils/collageEngine';
-import { generateCollage, downloadCollage } from '../utils/collageEngine';
+import { generateCollage } from '../utils/collageEngine';
 
 interface ExportPanelProps {
   imageGroups: LoadedImage[][];
@@ -13,6 +15,22 @@ export default function ExportPanel({ imageGroups, settings, disabled }: ExportP
   const [exportFormat, setExportFormat] = useState<'png' | 'jpeg'>('png');
   const [exportProgress, setExportProgress] = useState({ current: 0, total: 0 });
 
+  const canvasToBlob = (canvas: HTMLCanvasElement, format: 'png' | 'jpeg'): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create blob'));
+          }
+        },
+        format === 'jpeg' ? 'image/jpeg' : 'image/png',
+        format === 'jpeg' ? 0.95 : undefined
+      );
+    });
+  };
+
   const handleExportAll = async () => {
     if (imageGroups.length === 0) return;
 
@@ -20,15 +38,22 @@ export default function ExportPanel({ imageGroups, settings, disabled }: ExportP
     setExportProgress({ current: 0, total: imageGroups.length });
     
     try {
+      const zip = new JSZip();
+      const extension = exportFormat === 'jpeg' ? 'jpg' : 'png';
+      
       for (let i = 0; i < imageGroups.length; i++) {
         setExportProgress({ current: i + 1, total: imageGroups.length });
         const canvas = generateCollage(imageGroups[i], settings);
-        await downloadCollage(canvas, `collage_${String(i + 1).padStart(2, '0')}`, exportFormat);
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        const blob = await canvasToBlob(canvas, exportFormat);
+        zip.file(`collage_${String(i + 1).padStart(2, '0')}.${extension}`, blob);
       }
+      
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const timestamp = new Date().toISOString().slice(0, 10);
+      saveAs(zipBlob, `collages_${timestamp}.zip`);
     } catch (error) {
       console.error('Export failed:', error);
-      alert('Failed to export some collages. Please try again.');
+      alert('Failed to export collages. Please try again.');
     } finally {
       setIsExporting(false);
       setExportProgress({ current: 0, total: 0 });
@@ -41,7 +66,9 @@ export default function ExportPanel({ imageGroups, settings, disabled }: ExportP
     setIsExporting(true);
     try {
       const canvas = generateCollage(imageGroups[index], settings);
-      await downloadCollage(canvas, `collage_${String(index + 1).padStart(2, '0')}`, exportFormat);
+      const blob = await canvasToBlob(canvas, exportFormat);
+      const extension = exportFormat === 'jpeg' ? 'jpg' : 'png';
+      saveAs(blob, `collage_${String(index + 1).padStart(2, '0')}.${extension}`);
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export collage. Please try again.');

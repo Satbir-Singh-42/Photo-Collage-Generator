@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/jszip": "^3.4.0",
     "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
     "pica": "^9.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
