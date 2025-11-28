@@ -41,6 +41,22 @@ function App() {
     }
   }, []);
 
+  const handleAddMoreImages = useCallback(async (files: File[]) => {
+    setIsLoading(true);
+    setLoadProgress({ loaded: 0, total: files.length });
+
+    try {
+      const newImages = await loadImages(files, (loaded, total) => {
+        setLoadProgress({ loaded, total });
+      });
+      setLoadedImages(prev => [...prev, ...newImages]);
+    } catch (error) {
+      console.error('Failed to load images:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const handleClearImages = useCallback(() => {
     setLoadedImages([]);
     setActiveCollageIndex(0);
@@ -72,16 +88,24 @@ function App() {
               <h3>Upload Images</h3>
             </div>
             <div className="card-body">
-              <ImageUploader onFilesSelected={handleFilesSelected} disabled={isLoading} />
+              {loadedImages.length === 0 ? (
+                <ImageUploader onFilesSelected={handleFilesSelected} disabled={isLoading} />
+              ) : (
+                <div className="images-loaded-section">
+                  <div className="images-count">
+                    <span className="count-number">{loadedImages.length}</span>
+                    <span className="count-label">images loaded</span>
+                  </div>
+                  <ImageUploader onFilesSelected={handleAddMoreImages} disabled={isLoading} isAddMore />
+                  <button className="clear-btn" onClick={handleClearImages} disabled={isLoading}>
+                    Clear All Images
+                  </button>
+                </div>
+              )}
               {isLoading && (
                 <div className="loading-progress">
                   Loading: {loadProgress.loaded} / {loadProgress.total} images
                 </div>
-              )}
-              {loadedImages.length > 0 && !isLoading && (
-                <button className="clear-btn" onClick={handleClearImages}>
-                  Clear All Images
-                </button>
               )}
             </div>
           </div>
