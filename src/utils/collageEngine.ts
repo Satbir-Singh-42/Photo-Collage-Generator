@@ -433,27 +433,20 @@ export function generateCollage(
     let finalW = imgW;
     let finalH = imgH;
     
+    const x = cellX + Math.floor((cellW - finalW) / 2);
+    const y = cellY + Math.floor((cellH - finalH) / 2);
+    
     if (settings.enableDropShadow) {
       ctx.save();
       ctx.shadowColor = settings.shadowColor;
       ctx.shadowBlur = settings.shadowBlur;
       ctx.shadowOffsetX = settings.shadowOffsetX;
       ctx.shadowOffsetY = settings.shadowOffsetY;
-    }
-    
-    const x = cellX + Math.floor((cellW - finalW) / 2);
-    const y = cellY + Math.floor((cellH - finalH) / 2);
-    
-    if (settings.enableDropShadow && settings.enableRoundedCorners) {
-      ctx.fillStyle = '#ffffff';
-      drawRoundedRect(ctx, x, y, finalW, finalH, settings.roundedCornersRadius);
-      ctx.fill();
-    }
-    
-    ctx.drawImage(processedCanvas, x, y);
-    
-    if (settings.enableDropShadow) {
+      
+      ctx.drawImage(processedCanvas, x, y);
       ctx.restore();
+    } else {
+      ctx.drawImage(processedCanvas, x, y);
     }
   }
   
