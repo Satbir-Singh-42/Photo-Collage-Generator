@@ -16,15 +16,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Collage Generator"
+args = "Collage Generator GUI"
 
 [[workflows.workflow]]
-name = "Collage Generator"
+name = "Collage Generator GUI"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py"
+args = "python gui_app.py"
 
 [workflows.workflow.metadata]
-outputType = "console"
+outputType = "vnc"

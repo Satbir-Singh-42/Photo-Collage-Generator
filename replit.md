@@ -8,6 +8,7 @@ This project automatically generates multiple photo collages from a folder conta
 
 ```
 /
+├── gui_app.py               # Desktop GUI application (main interface)
 ├── main.py                  # Interactive menu-driven interface
 ├── collage_generator.py     # Core collage generation engine
 ├── create_sample_images.py  # Sample image generator for testing
@@ -18,6 +19,19 @@ This project automatically generates multiple photo collages from a folder conta
 ```
 
 ## How to Use
+
+### GUI Mode (Recommended)
+The application runs with a visual interface similar to Shape Collage:
+- **Left Panel**: Photo list with selection (add/remove individual photos)
+- **Center Panel**: Preview and progress display
+- **Right Panel**: Settings tabs for Shape, Appearance, and Advanced options
+
+Features in GUI:
+- Add photos individually or entire folders
+- Select and remove specific photos
+- Preview before generating
+- Real-time progress tracking
+- Save individual collages with custom names
 
 ### Interactive Mode
 Run `python main.py` to use the interactive menu:
@@ -55,7 +69,7 @@ Options:
 ### Collage Settings
 - Canvas size: 3000×3000 px (configurable)
 - Resolution: 300 DPI (print quality)
-- Background: White (RGBA)
+- Background: White or Transparent
 
 ### Shape Options
 - Square
@@ -85,14 +99,15 @@ Options:
 
 - Python 3.11
 - Pillow (PIL) for image processing
-- NumPy for calculations
+- Tkinter for GUI
 
 ## Recent Changes
 
-- Initial project setup with full collage generator
-- Added interactive menu (main.py)
-- Added batch processing (run_batch.py)
-- Implemented all shape types (square, rectangle, circle, heart, custom mask)
-- Added rounded corners and drop shadow effects
-- Dual format export (PNG/JPG)
-- Error handling for corrupted images
+- Added desktop GUI application (gui_app.py) matching Shape Collage interface
+- Three-panel layout: Photos, Preview, Settings
+- Tabbed settings: Shape and Size, Appearance, Advanced
+- Photo selection with add/remove functionality
+- Preview generation with progress bar
+- Batch collage generation with progress tracking
+- Save dialog for custom file naming
+- Thread-safe UI updates
