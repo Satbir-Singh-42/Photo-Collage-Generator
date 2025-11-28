@@ -37,7 +37,7 @@ class CollageSettings:
     background_color: Tuple[int, int, int, int] = (255, 255, 255, 255)
     outer_frame_thickness: int = 20
     outer_frame_color: str = "#FFFFFF"
-    inner_spacing: int = 5
+    inner_spacing: int = 10
     rounded_corners_radius: int = 10
     enable_rounded_corners: bool = True
     enable_drop_shadow: bool = True
@@ -209,7 +209,12 @@ class CollageGenerator:
         draw.polygon(points, fill=255)
     
     def create_collage(self, images: List[Path], collage_index: int) -> Optional[Image.Image]:
-        """Create a single collage from a list of images."""
+        """Create a single collage from a list of images.
+        
+        Images are placed in a strict grid layout where each image gets its own
+        non-overlapping cell. All images are resized to the same dimensions to
+        ensure consistent spacing and no overlapping, regardless of original sizes.
+        """
         loaded_images = []
         for img_path in images:
             img = self.load_image_safely(img_path)
@@ -227,8 +232,10 @@ class CollageGenerator:
         frame = self.settings.outer_frame_thickness
         spacing = self.settings.inner_spacing
         
-        usable_w = canvas_w - (2 * frame) - ((cols - 1) * spacing)
-        usable_h = canvas_h - (2 * frame) - ((rows - 1) * spacing)
+        total_h_spacing = (cols - 1) * spacing
+        total_v_spacing = (rows - 1) * spacing
+        usable_w = canvas_w - (2 * frame) - total_h_spacing
+        usable_h = canvas_h - (2 * frame) - total_v_spacing
         
         cell_w = usable_w // cols
         cell_h = usable_h // rows
@@ -240,19 +247,24 @@ class CollageGenerator:
                 abs(self.settings.shadow_offset[1])
             )
         
-        img_w = cell_w - (2 * shadow_padding)
-        img_h = cell_h - (2 * shadow_padding)
+        extra_margin = 4
+        img_w = cell_w - (2 * shadow_padding) - extra_margin
+        img_h = cell_h - (2 * shadow_padding) - extra_margin
         
-        if img_w <= 0 or img_h <= 0:
-            img_w = max(10, cell_w - 10)
-            img_h = max(10, cell_h - 10)
-            shadow_padding = 5
+        min_size = 20
+        if img_w < min_size or img_h < min_size:
+            img_w = max(min_size, cell_w - 10)
+            img_h = max(min_size, cell_h - 10)
+            shadow_padding = 2
         
         canvas = Image.new('RGBA', self.settings.canvas_size, self.settings.background_color)
         
         for idx, img in enumerate(loaded_images):
             row = idx // cols
             col = idx % cols
+            
+            cell_x = frame + col * (cell_w + spacing)
+            cell_y = frame + row * (cell_h + spacing)
             
             processed_img = self.smart_crop(img, (img_w, img_h))
             
@@ -270,8 +282,18 @@ class CollageGenerator:
                     self.settings.shadow_color
                 )
             
-            x = frame + col * (cell_w + spacing) + (cell_w - processed_img.width) // 2
-            y = frame + row * (cell_h + spacing) + (cell_h - processed_img.height) // 2
+            final_w = processed_img.width
+            final_h = processed_img.height
+            
+            if final_w > cell_w or final_h > cell_h:
+                scale = min(cell_w / final_w, cell_h / final_h)
+                new_w = int(final_w * scale)
+                new_h = int(final_h * scale)
+                processed_img = processed_img.resize((new_w, new_h), Image.Resampling.LANCZOS)
+                final_w, final_h = new_w, new_h
+            
+            x = cell_x + (cell_w - final_w) // 2
+            y = cell_y + (cell_h - final_h) // 2
             
             canvas.paste(processed_img, (x, y), processed_img)
         
@@ -355,7 +377,7 @@ def main():
         background_color=(255, 255, 255, 255),
         outer_frame_thickness=20,
         outer_frame_color="#FFFFFF",
-        inner_spacing=5,
+        inner_spacing=10,
         rounded_corners_radius=10,
         enable_rounded_corners=True,
         enable_drop_shadow=True,

@@ -11,6 +11,7 @@ Automatically generate beautiful photo collages from your image collection. Supp
 - Dual format export (PNG and JPG)
 - Error handling for corrupted images
 - Both GUI and command-line interfaces
+- **Non-overlapping grid layout**: Images of any size are automatically resized and placed in a clean grid with proper spacing - no overlapping guaranteed
 
 ## Requirements
 
@@ -113,8 +114,18 @@ When using the scripts, you can customize:
 | Shape | square, rectangle, circle, heart | square |
 | Background Color | Canvas background | White |
 | Frame Thickness | Outer border width | 20 pixels |
+| Inner Spacing | Gap between images (prevents overlap) | 10 pixels |
 | Rounded Corners | Enable/disable | Enabled |
 | Drop Shadow | Enable/disable | Enabled |
+
+## How Image Sizing Works
+
+The generator automatically handles images of different sizes:
+
+1. **Grid Layout**: Images are arranged in a calculated grid (e.g., 8x7 for 50 images)
+2. **Smart Cropping**: Each image is cropped to fit a uniform cell size while preserving the most important part (center-focused)
+3. **No Overlapping**: Every image fits within its own cell with guaranteed spacing between them
+4. **Consistent Output**: Regardless of whether your photos are portrait, landscape, or square, the final collage will look clean and organized
 
 ## Supported Image Formats
 
