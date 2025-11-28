@@ -344,11 +344,21 @@ export function generateCollage(
     shadowPadding = 2;
   }
   
+  const totalImages = images.length;
+  const lastRowImageCount = totalImages % cols || cols;
+  const lastRowIndex = rows - 1;
+  
   for (let idx = 0; idx < images.length; idx++) {
     const row = Math.floor(idx / cols);
     const col = idx % cols;
     
-    const cellX = frame + col * (cellW + spacing);
+    let rowOffset = 0;
+    if (row === lastRowIndex && lastRowImageCount < cols) {
+      const emptySpaces = cols - lastRowImageCount;
+      rowOffset = (emptySpaces * (cellW + spacing)) / 2;
+    }
+    
+    const cellX = frame + col * (cellW + spacing) + rowOffset;
     const cellY = frame + row * (cellH + spacing);
     
     const img = images[idx].element;
