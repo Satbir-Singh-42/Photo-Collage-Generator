@@ -148,15 +148,20 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
                 <input
                   type="checkbox"
                   checked={settings.enableRoundedCorners}
-                  onChange={(e) => updateSetting('enableRoundedCorners', e.target.checked)}
+                  onChange={(e) => {
+                    updateSetting('enableRoundedCorners', e.target.checked);
+                    if (e.target.checked && settings.roundedCornersRadius === 0) {
+                      updateSetting('roundedCornersRadius', 20);
+                    }
+                  }}
                 />
-                Rounded Corners
+                Rounded Image Corners
               </label>
             </div>
 
             {settings.enableRoundedCorners && (
               <div className="setting-group">
-                <label htmlFor="roundedCornersRadius">Corner Radius</label>
+                <label htmlFor="roundedCornersRadius">Image Corner Radius</label>
                 <div className="setting-row">
                   <input
                     type="range"
