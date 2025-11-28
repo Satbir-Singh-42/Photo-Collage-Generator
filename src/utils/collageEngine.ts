@@ -104,25 +104,30 @@ export async function loadImages(
   return images;
 }
 
-function smartCrop(
+function fitImage(
   img: HTMLImageElement,
   targetWidth: number,
-  targetHeight: number
-): ImageData {
+  targetHeight: number,
+  backgroundColor: string
+): HTMLCanvasElement {
   const imgRatio = img.width / img.height;
   const targetRatio = targetWidth / targetHeight;
   
-  let sourceX = 0;
-  let sourceY = 0;
-  let sourceWidth = img.width;
-  let sourceHeight = img.height;
+  let drawWidth: number;
+  let drawHeight: number;
+  let drawX: number;
+  let drawY: number;
   
   if (imgRatio > targetRatio) {
-    sourceWidth = img.height * targetRatio;
-    sourceX = (img.width - sourceWidth) / 2;
+    drawWidth = targetWidth;
+    drawHeight = targetWidth / imgRatio;
+    drawX = 0;
+    drawY = (targetHeight - drawHeight) / 2;
   } else {
-    sourceHeight = img.width / targetRatio;
-    sourceY = (img.height - sourceHeight) / 2;
+    drawHeight = targetHeight;
+    drawWidth = targetHeight * imgRatio;
+    drawX = (targetWidth - drawWidth) / 2;
+    drawY = 0;
   }
   
   const tempCanvas = document.createElement('canvas');
@@ -130,13 +135,16 @@ function smartCrop(
   tempCanvas.height = targetHeight;
   const tempCtx = tempCanvas.getContext('2d')!;
   
+  tempCtx.fillStyle = backgroundColor;
+  tempCtx.fillRect(0, 0, targetWidth, targetHeight);
+  
   tempCtx.drawImage(
     img,
-    sourceX, sourceY, sourceWidth, sourceHeight,
-    0, 0, targetWidth, targetHeight
+    0, 0, img.width, img.height,
+    drawX, drawY, drawWidth, drawHeight
   );
   
-  return tempCtx.getImageData(0, 0, targetWidth, targetHeight);
+  return tempCanvas;
 }
 
 function drawRoundedRect(
@@ -270,15 +278,7 @@ export function generateCollage(
     
     const img = images[idx].element;
     
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = imgW;
-    tempCanvas.height = imgH;
-    const tempCtx = tempCanvas.getContext('2d')!;
-    
-    const imgData = smartCrop(img, imgW, imgH);
-    tempCtx.putImageData(imgData, 0, 0);
-    
-    let processedCanvas = tempCanvas;
+    let processedCanvas = fitImage(img, imgW, imgH, settings.backgroundColor);
     
     if (settings.enableRoundedCorners && settings.roundedCornersRadius > 0) {
       const roundedCanvas = document.createElement('canvas');
