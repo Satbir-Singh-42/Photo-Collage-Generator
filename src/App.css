@@ -308,6 +308,59 @@ body {
   font-size: 1rem;
 }
 
+.optional-adjustments {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.optional-adjustments-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.optional-adjustments-toggle:hover {
+  background: var(--surface);
+  border-color: var(--primary-color);
+}
+
+.toggle-arrow {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  transition: transform 0.2s;
+}
+
+.toggle-arrow.open {
+  transform: rotate(180deg);
+}
+
+.optional-adjustments-content {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--background);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.optional-adjustments-content .setting-group {
+  margin-bottom: 1rem;
+}
+
+.optional-adjustments-content .setting-group:last-child {
+  margin-bottom: 0;
+}
+
 .export-buttons {
   display: flex;
   flex-direction: column;

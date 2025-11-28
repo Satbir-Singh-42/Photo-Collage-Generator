@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { CollageSettings, CollageShape } from '../utils/collageEngine';
 
 interface SettingsPanelProps {
@@ -7,6 +8,8 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({ settings, onSettingsChange, imageCount }: SettingsPanelProps) {
+  const [showOptionalAdjustments, setShowOptionalAdjustments] = useState(false);
+
   const updateSetting = <K extends keyof CollageSettings>(key: K, value: CollageSettings[K]) => {
     onSettingsChange({ ...settings, [key]: value });
   };
@@ -97,91 +100,107 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
         </div>
       )}
 
-      <div className="setting-group">
-        <label htmlFor="outerFrameThickness">Frame Thickness</label>
-        <div className="setting-row">
-          <input
-            type="range"
-            id="outerFrameThickness"
-            min="0"
-            max="100"
-            value={settings.outerFrameThickness}
-            onChange={(e) => updateSetting('outerFrameThickness', parseInt(e.target.value))}
-          />
-          <span className="range-value">{settings.outerFrameThickness}px</span>
-        </div>
-      </div>
+      <div className="optional-adjustments">
+        <button 
+          className="optional-adjustments-toggle"
+          onClick={() => setShowOptionalAdjustments(!showOptionalAdjustments)}
+        >
+          <span>Optional Adjustment</span>
+          <span className={`toggle-arrow ${showOptionalAdjustments ? 'open' : ''}`}>
+            {showOptionalAdjustments ? '▲' : '▼'}
+          </span>
+        </button>
 
-      <div className="setting-group">
-        <label htmlFor="innerSpacing">Inner Spacing</label>
-        <div className="setting-row">
-          <input
-            type="range"
-            id="innerSpacing"
-            min="0"
-            max="50"
-            value={settings.innerSpacing}
-            onChange={(e) => updateSetting('innerSpacing', parseInt(e.target.value))}
-          />
-          <span className="range-value">{settings.innerSpacing}px</span>
-        </div>
-      </div>
+        {showOptionalAdjustments && (
+          <div className="optional-adjustments-content">
+            <div className="setting-group">
+              <label htmlFor="outerFrameThickness">Frame Thickness</label>
+              <div className="setting-row">
+                <input
+                  type="range"
+                  id="outerFrameThickness"
+                  min="0"
+                  max="100"
+                  value={settings.outerFrameThickness}
+                  onChange={(e) => updateSetting('outerFrameThickness', parseInt(e.target.value))}
+                />
+                <span className="range-value">{settings.outerFrameThickness}px</span>
+              </div>
+            </div>
 
-      <div className="setting-group checkbox">
-        <label>
-          <input
-            type="checkbox"
-            checked={settings.enableRoundedCorners}
-            onChange={(e) => updateSetting('enableRoundedCorners', e.target.checked)}
-          />
-          Rounded Corners
-        </label>
-      </div>
+            <div className="setting-group">
+              <label htmlFor="innerSpacing">Inner Spacing</label>
+              <div className="setting-row">
+                <input
+                  type="range"
+                  id="innerSpacing"
+                  min="0"
+                  max="50"
+                  value={settings.innerSpacing}
+                  onChange={(e) => updateSetting('innerSpacing', parseInt(e.target.value))}
+                />
+                <span className="range-value">{settings.innerSpacing}px</span>
+              </div>
+            </div>
 
-      {settings.enableRoundedCorners && (
-        <div className="setting-group">
-          <label htmlFor="roundedCornersRadius">Corner Radius</label>
-          <div className="setting-row">
-            <input
-              type="range"
-              id="roundedCornersRadius"
-              min="0"
-              max="50"
-              value={settings.roundedCornersRadius}
-              onChange={(e) => updateSetting('roundedCornersRadius', parseInt(e.target.value))}
-            />
-            <span className="range-value">{settings.roundedCornersRadius}px</span>
+            <div className="setting-group checkbox">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={settings.enableRoundedCorners}
+                  onChange={(e) => updateSetting('enableRoundedCorners', e.target.checked)}
+                />
+                Rounded Corners
+              </label>
+            </div>
+
+            {settings.enableRoundedCorners && (
+              <div className="setting-group">
+                <label htmlFor="roundedCornersRadius">Corner Radius</label>
+                <div className="setting-row">
+                  <input
+                    type="range"
+                    id="roundedCornersRadius"
+                    min="0"
+                    max="50"
+                    value={settings.roundedCornersRadius}
+                    onChange={(e) => updateSetting('roundedCornersRadius', parseInt(e.target.value))}
+                  />
+                  <span className="range-value">{settings.roundedCornersRadius}px</span>
+                </div>
+              </div>
+            )}
+
+            <div className="setting-group checkbox">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={settings.enableDropShadow}
+                  onChange={(e) => updateSetting('enableDropShadow', e.target.checked)}
+                />
+                Drop Shadow
+              </label>
+            </div>
+
+            {settings.enableDropShadow && (
+              <div className="setting-group">
+                <label htmlFor="shadowBlur">Shadow Blur</label>
+                <div className="setting-row">
+                  <input
+                    type="range"
+                    id="shadowBlur"
+                    min="0"
+                    max="30"
+                    value={settings.shadowBlur}
+                    onChange={(e) => updateSetting('shadowBlur', parseInt(e.target.value))}
+                  />
+                  <span className="range-value">{settings.shadowBlur}px</span>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      <div className="setting-group checkbox">
-        <label>
-          <input
-            type="checkbox"
-            checked={settings.enableDropShadow}
-            onChange={(e) => updateSetting('enableDropShadow', e.target.checked)}
-          />
-          Drop Shadow
-        </label>
+        )}
       </div>
-
-      {settings.enableDropShadow && (
-        <div className="setting-group">
-          <label htmlFor="shadowBlur">Shadow Blur</label>
-          <div className="setting-row">
-            <input
-              type="range"
-              id="shadowBlur"
-              min="0"
-              max="30"
-              value={settings.shadowBlur}
-              onChange={(e) => updateSetting('shadowBlur', parseInt(e.target.value))}
-            />
-            <span className="range-value">{settings.shadowBlur}px</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
