@@ -49,38 +49,68 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Photo Collage Generator</h1>
-        <p>Create beautiful photo collages right in your browser</p>
+        <div className="app-header-content">
+          <div className="app-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+          </div>
+          <div>
+            <h1>Photo Collage Generator</h1>
+            <p>Create stunning collages in seconds</p>
+          </div>
+        </div>
       </header>
 
       <main className="app-main">
         <div className="sidebar">
-          <div className="upload-section">
-            <h3>Upload Images</h3>
-            <ImageUploader onFilesSelected={handleFilesSelected} disabled={isLoading} />
-            {isLoading && (
-              <div className="loading-progress">
-                Loading: {loadProgress.loaded} / {loadProgress.total}
-              </div>
-            )}
-            {loadedImages.length > 0 && !isLoading && (
-              <button className="clear-btn" onClick={handleClearImages}>
-                Clear All Images
-              </button>
-            )}
+          <div className="card">
+            <div className="card-header">
+              <h3>Upload Images</h3>
+            </div>
+            <div className="card-body">
+              <ImageUploader onFilesSelected={handleFilesSelected} disabled={isLoading} />
+              {isLoading && (
+                <div className="loading-progress">
+                  Loading: {loadProgress.loaded} / {loadProgress.total} images
+                </div>
+              )}
+              {loadedImages.length > 0 && !isLoading && (
+                <button className="clear-btn" onClick={handleClearImages}>
+                  Clear All Images
+                </button>
+              )}
+            </div>
           </div>
 
-          <SettingsPanel
-            settings={settings}
-            onSettingsChange={setSettings}
-            imageCount={loadedImages.length}
-          />
+          <div className="card">
+            <div className="card-header">
+              <h3>Settings</h3>
+            </div>
+            <div className="card-body">
+              <SettingsPanel
+                settings={settings}
+                onSettingsChange={setSettings}
+                imageCount={loadedImages.length}
+              />
+            </div>
+          </div>
 
-          <ExportPanel
-            imageGroups={imageGroups}
-            settings={settings}
-            disabled={isLoading || loadedImages.length === 0}
-          />
+          <div className="card">
+            <div className="card-header">
+              <h3>Export</h3>
+            </div>
+            <div className="card-body">
+              <ExportPanel
+                imageGroups={imageGroups}
+                settings={settings}
+                disabled={isLoading || loadedImages.length === 0}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="main-content">
@@ -92,7 +122,7 @@ function App() {
                   className={`collage-tab ${index === activeCollageIndex ? 'active' : ''}`}
                   onClick={() => setActiveCollageIndex(index)}
                 >
-                  Collage {index + 1} ({group.length} images)
+                  Collage {index + 1} ({group.length})
                 </button>
               ))}
             </div>
@@ -107,7 +137,12 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>All processing happens in your browser. Your images are never uploaded to any server.</p>
+        <p>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          All processing happens locally in your browser. Your images never leave your device.
+        </p>
       </footer>
     </div>
   );

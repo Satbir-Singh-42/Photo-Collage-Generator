@@ -13,8 +13,6 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
 
   return (
     <div className="settings-panel">
-      <h3>Collage Settings</h3>
-      
       <div className="setting-group">
         <label>Images Loaded</label>
         <div className="setting-value">{imageCount} images</div>
@@ -83,29 +81,33 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
       </div>
 
       <div className="setting-group">
-        <label htmlFor="outerFrameThickness">Frame Thickness (px)</label>
-        <input
-          type="range"
-          id="outerFrameThickness"
-          min="0"
-          max="100"
-          value={settings.outerFrameThickness}
-          onChange={(e) => updateSetting('outerFrameThickness', parseInt(e.target.value))}
-        />
-        <span className="range-value">{settings.outerFrameThickness}</span>
+        <label htmlFor="outerFrameThickness">Frame Thickness</label>
+        <div className="setting-row">
+          <input
+            type="range"
+            id="outerFrameThickness"
+            min="0"
+            max="100"
+            value={settings.outerFrameThickness}
+            onChange={(e) => updateSetting('outerFrameThickness', parseInt(e.target.value))}
+          />
+          <span className="range-value">{settings.outerFrameThickness}px</span>
+        </div>
       </div>
 
       <div className="setting-group">
-        <label htmlFor="innerSpacing">Inner Spacing (px)</label>
-        <input
-          type="range"
-          id="innerSpacing"
-          min="0"
-          max="50"
-          value={settings.innerSpacing}
-          onChange={(e) => updateSetting('innerSpacing', parseInt(e.target.value))}
-        />
-        <span className="range-value">{settings.innerSpacing}</span>
+        <label htmlFor="innerSpacing">Inner Spacing</label>
+        <div className="setting-row">
+          <input
+            type="range"
+            id="innerSpacing"
+            min="0"
+            max="50"
+            value={settings.innerSpacing}
+            onChange={(e) => updateSetting('innerSpacing', parseInt(e.target.value))}
+          />
+          <span className="range-value">{settings.innerSpacing}px</span>
+        </div>
       </div>
 
       <div className="setting-group checkbox">
@@ -121,16 +123,18 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
 
       {settings.enableRoundedCorners && (
         <div className="setting-group">
-          <label htmlFor="roundedCornersRadius">Corner Radius (px)</label>
-          <input
-            type="range"
-            id="roundedCornersRadius"
-            min="0"
-            max="50"
-            value={settings.roundedCornersRadius}
-            onChange={(e) => updateSetting('roundedCornersRadius', parseInt(e.target.value))}
-          />
-          <span className="range-value">{settings.roundedCornersRadius}</span>
+          <label htmlFor="roundedCornersRadius">Corner Radius</label>
+          <div className="setting-row">
+            <input
+              type="range"
+              id="roundedCornersRadius"
+              min="0"
+              max="50"
+              value={settings.roundedCornersRadius}
+              onChange={(e) => updateSetting('roundedCornersRadius', parseInt(e.target.value))}
+            />
+            <span className="range-value">{settings.roundedCornersRadius}px</span>
+          </div>
         </div>
       )}
 
@@ -146,9 +150,9 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
       </div>
 
       {settings.enableDropShadow && (
-        <>
-          <div className="setting-group">
-            <label htmlFor="shadowBlur">Shadow Blur (px)</label>
+        <div className="setting-group">
+          <label htmlFor="shadowBlur">Shadow Blur</label>
+          <div className="setting-row">
             <input
               type="range"
               id="shadowBlur"
@@ -157,9 +161,9 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
               value={settings.shadowBlur}
               onChange={(e) => updateSetting('shadowBlur', parseInt(e.target.value))}
             />
-            <span className="range-value">{settings.shadowBlur}</span>
+            <span className="range-value">{settings.shadowBlur}px</span>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

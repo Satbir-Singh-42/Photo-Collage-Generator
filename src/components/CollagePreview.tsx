@@ -86,7 +86,15 @@ export default function CollagePreview({ images, settings, collageIndex }: Colla
     <div className="collage-preview" ref={containerRef}>
       {images.length === 0 ? (
         <div className="preview-placeholder">
-          <p>Upload images to see preview</p>
+          <div className="preview-placeholder-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </div>
+          <p>No images uploaded</p>
+          <p className="hint">Upload images to see your collage preview</p>
         </div>
       ) : isGenerating ? (
         <div className="preview-loading">
@@ -96,7 +104,7 @@ export default function CollagePreview({ images, settings, collageIndex }: Colla
       ) : previewUrl ? (
         <div className="preview-image-container">
           <div className="preview-info">
-            Collage {collageIndex + 1}: {images.length} images in {rows}x{cols} grid
+            Collage {collageIndex + 1}: {images.length} images in {rows} x {cols} grid
           </div>
           <img src={previewUrl} alt={`Collage preview ${collageIndex + 1}`} className="preview-image" />
         </div>
