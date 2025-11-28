@@ -80,7 +80,7 @@ export default function CollagePreview({ images, settings, collageIndex }: Colla
     };
   }, [imageIds, settingsKey]);
 
-  const { rows, cols } = calculateGrid(images.length);
+  const { rows, cols } = calculateGrid(images.length, settings.canvasWidth, settings.canvasHeight);
 
   return (
     <div className="collage-preview" ref={containerRef}>
