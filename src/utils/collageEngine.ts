@@ -41,6 +41,7 @@ export interface LoadedImage {
   element: HTMLImageElement;
   width: number;
   height: number;
+  rotation: number;
 }
 
 export function calculateGrid(numImages: number, canvasWidth?: number, canvasHeight?: number): { rows: number; cols: number } {
@@ -124,6 +125,7 @@ export async function loadImage(file: File): Promise<LoadedImage> {
           element: img,
           width: img.width,
           height: img.height,
+          rotation: 0,
         });
       };
       img.onerror = () => reject(new Error(`Failed to load image: ${file.name}`));
@@ -159,9 +161,14 @@ function fitImage(
   img: HTMLImageElement,
   targetWidth: number,
   targetHeight: number,
-  backgroundColor: string
+  backgroundColor: string,
+  rotation: number = 0
 ): HTMLCanvasElement {
-  const imgRatio = img.width / img.height;
+  const isRotated90or270 = rotation === 90 || rotation === 270;
+  const srcWidth = isRotated90or270 ? img.height : img.width;
+  const srcHeight = isRotated90or270 ? img.width : img.height;
+  
+  const imgRatio = srcWidth / srcHeight;
   const targetRatio = targetWidth / targetHeight;
   
   let drawWidth: number;
@@ -191,11 +198,27 @@ function fitImage(
     tempCtx.fillRect(0, 0, targetWidth, targetHeight);
   }
   
-  tempCtx.drawImage(
-    img,
-    0, 0, img.width, img.height,
-    drawX, drawY, drawWidth, drawHeight
-  );
+  if (rotation !== 0) {
+    tempCtx.save();
+    tempCtx.translate(drawX + drawWidth / 2, drawY + drawHeight / 2);
+    tempCtx.rotate((rotation * Math.PI) / 180);
+    
+    const rotatedDrawWidth = isRotated90or270 ? drawHeight : drawWidth;
+    const rotatedDrawHeight = isRotated90or270 ? drawWidth : drawHeight;
+    
+    tempCtx.drawImage(
+      img,
+      -rotatedDrawWidth / 2, -rotatedDrawHeight / 2,
+      rotatedDrawWidth, rotatedDrawHeight
+    );
+    tempCtx.restore();
+  } else {
+    tempCtx.drawImage(
+      img,
+      0, 0, img.width, img.height,
+      drawX, drawY, drawWidth, drawHeight
+    );
+  }
   
   return tempCanvas;
 }
@@ -411,9 +434,10 @@ export function generateCollage(
     const cellY = frame + row * (cellH + spacing);
     
     const img = images[idx].element;
+    const rotation = images[idx].rotation || 0;
     
     const bgColor = settings.transparentBackground ? 'transparent' : settings.backgroundColor;
-    let processedCanvas = fitImage(img, imgW, imgH, bgColor);
+    let processedCanvas = fitImage(img, imgW, imgH, bgColor, rotation);
     
     if (settings.enableRoundedCorners && settings.roundedCornersRadius > 0) {
       const roundedCanvas = document.createElement('canvas');
