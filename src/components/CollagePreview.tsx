@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import type { CollageSettings, LoadedImage } from '../utils/collageEngine';
-import { generateCollage, calculateGrid } from '../utils/collageEngine';
+import { generateCollage, calculateGrid, inchesToPixels } from '../utils/collageEngine';
 
 interface CollagePreviewProps {
   images: LoadedImage[];
@@ -14,8 +14,9 @@ export default function CollagePreview({ images, settings, collageIndex }: Colla
   const [isGenerating, setIsGenerating] = useState(false);
   
   const settingsKey = useMemo(() => JSON.stringify({
-    canvasWidth: settings.canvasWidth,
-    canvasHeight: settings.canvasHeight,
+    canvasWidthInches: settings.canvasWidthInches,
+    canvasHeightInches: settings.canvasHeightInches,
+    dpi: settings.dpi,
     backgroundColor: settings.backgroundColor,
     outerFrameThickness: settings.outerFrameThickness,
     innerSpacing: settings.innerSpacing,
@@ -24,7 +25,7 @@ export default function CollagePreview({ images, settings, collageIndex }: Colla
     enableDropShadow: settings.enableDropShadow,
     shadowBlur: settings.shadowBlur,
     shape: settings.shape,
-  }), [settings.canvasWidth, settings.canvasHeight, settings.backgroundColor,
+  }), [settings.canvasWidthInches, settings.canvasHeightInches, settings.dpi, settings.backgroundColor,
       settings.outerFrameThickness, settings.innerSpacing, settings.roundedCornersRadius,
       settings.enableRoundedCorners, settings.enableDropShadow, settings.shadowBlur, settings.shape]);
 
@@ -80,7 +81,9 @@ export default function CollagePreview({ images, settings, collageIndex }: Colla
     };
   }, [imageIds, settingsKey]);
 
-  const { rows, cols } = calculateGrid(images.length, settings.canvasWidth, settings.canvasHeight);
+  const canvasWidth = inchesToPixels(settings.canvasWidthInches, settings.dpi);
+  const canvasHeight = inchesToPixels(settings.canvasHeightInches, settings.dpi);
+  const { rows, cols } = calculateGrid(images.length, canvasWidth, canvasHeight);
 
   return (
     <div className="collage-preview" ref={containerRef}>

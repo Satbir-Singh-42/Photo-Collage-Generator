@@ -40,29 +40,45 @@ export default function SettingsPanel({ settings, onSettingsChange, imageCount }
       )}
 
       <div className="setting-group">
-        <label htmlFor="canvasWidth">Canvas Width (px)</label>
+        <label htmlFor="canvasWidth">Canvas Width (inches)</label>
         <input
           type="number"
           id="canvasWidth"
-          min="500"
-          max="6000"
-          step="100"
-          value={settings.canvasWidth}
-          onChange={(e) => updateSetting('canvasWidth', parseInt(e.target.value) || 1000)}
+          min="1"
+          max="24"
+          step="0.5"
+          value={settings.canvasWidthInches}
+          onChange={(e) => updateSetting('canvasWidthInches', parseFloat(e.target.value) || 1)}
         />
       </div>
 
       <div className="setting-group">
-        <label htmlFor="canvasHeight">Canvas Height (px)</label>
+        <label htmlFor="canvasHeight">Canvas Height (inches)</label>
         <input
           type="number"
           id="canvasHeight"
-          min="500"
-          max="6000"
-          step="100"
-          value={settings.canvasHeight}
-          onChange={(e) => updateSetting('canvasHeight', parseInt(e.target.value) || 1000)}
+          min="1"
+          max="24"
+          step="0.5"
+          value={settings.canvasHeightInches}
+          onChange={(e) => updateSetting('canvasHeightInches', parseFloat(e.target.value) || 1)}
         />
+      </div>
+
+      <div className="setting-group">
+        <label htmlFor="dpi">Resolution (DPI)</label>
+        <select
+          id="dpi"
+          value={settings.dpi}
+          onChange={(e) => updateSetting('dpi', parseInt(e.target.value))}
+        >
+          <option value="150">150 DPI (Web/Screen)</option>
+          <option value="300">300 DPI (Print Quality)</option>
+          <option value="600">600 DPI (High Quality Print)</option>
+        </select>
+        <span className="setting-hint">
+          Output: {Math.round(settings.canvasWidthInches * settings.dpi)} x {Math.round(settings.canvasHeightInches * settings.dpi)} pixels
+        </span>
       </div>
 
       <div className="setting-group">

@@ -1,8 +1,9 @@
 export type CollageShape = 'square' | 'rectangle' | 'circle' | 'heart' | 'star' | 'diamond' | 'hexagon' | 'triangle';
 
 export interface CollageSettings {
-  canvasWidth: number;
-  canvasHeight: number;
+  canvasWidthInches: number;
+  canvasHeightInches: number;
+  dpi: number;
   backgroundColor: string;
   transparentBackground: boolean;
   outerFrameThickness: number;
@@ -19,8 +20,9 @@ export interface CollageSettings {
 }
 
 export const defaultSettings: CollageSettings = {
-  canvasWidth: 3000,
-  canvasHeight: 3000,
+  canvasWidthInches: 10,
+  canvasHeightInches: 10,
+  dpi: 300,
   backgroundColor: '#ffffff',
   transparentBackground: false,
   outerFrameThickness: 0,
@@ -35,6 +37,10 @@ export const defaultSettings: CollageSettings = {
   imagesPerCollage: 50,
   shape: 'square',
 };
+
+export function inchesToPixels(inches: number, dpi: number): number {
+  return Math.round(inches * dpi);
+}
 
 export interface LoadedImage {
   file: File;
@@ -374,11 +380,14 @@ export function generateCollage(
   images: LoadedImage[],
   settings: CollageSettings
 ): HTMLCanvasElement {
-  const { rows, cols } = calculateGrid(images.length, settings.canvasWidth, settings.canvasHeight);
+  const canvasWidth = inchesToPixels(settings.canvasWidthInches, settings.dpi);
+  const canvasHeight = inchesToPixels(settings.canvasHeightInches, settings.dpi);
+  
+  const { rows, cols } = calculateGrid(images.length, canvasWidth, canvasHeight);
   
   const canvas = document.createElement('canvas');
-  canvas.width = settings.canvasWidth;
-  canvas.height = settings.canvasHeight;
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
   const ctx = canvas.getContext('2d')!;
   
   if (!settings.transparentBackground) {
@@ -391,8 +400,8 @@ export function generateCollage(
   
   const totalHSpacing = (cols - 1) * spacing;
   const totalVSpacing = (rows - 1) * spacing;
-  const usableW = settings.canvasWidth - 2 * frame - totalHSpacing;
-  const usableH = settings.canvasHeight - 2 * frame - totalVSpacing;
+  const usableW = canvasWidth - 2 * frame - totalHSpacing;
+  const usableH = canvasHeight - 2 * frame - totalVSpacing;
   
   const cellW = Math.floor(usableW / cols);
   const cellH = Math.floor(usableH / rows);
